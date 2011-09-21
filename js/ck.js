@@ -3,8 +3,6 @@ CommonKnowledgeSmartboard = {
     xmppDomain: 'glint',
     
     init: function() {
-        console.log("Initializing...")
-        
         Sail.app.rollcall = new Rollcall.Client(Sail.app.rollcallURL)
         
         Sail.app.run = JSON.parse($.cookie('run'))
@@ -34,8 +32,6 @@ CommonKnowledgeSmartboard = {
     },
     
     authenticate: function() {
-        console.log("Authenticating...")
-        
         Sail.app.token = Sail.app.rollcall.getCurrentToken()
 
         if (!Sail.app.token) {
