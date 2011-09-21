@@ -1,0 +1,25 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <title>Common Knowledge ~ Smartboard</title> 
+  
+    <link href="css/ck.css" rel="stylesheet" type="text/css" /> 
+    <link href="js/sail.js/css/sail.css" rel="stylesheet" type="text/css" />
+    <link href="js/sail.js/css/jquery-ui/start/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/sail.js/sail.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        Sail.load()
+            .then('js/sail.js/rollcall.js')
+            .then('js/ck.js')
+            .thenRun(function() { 
+                return Sail.init(CommonKnowledgeSmartboard) 
+            })
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Common Knowledge</h1>
+    </header>
+</body>
+</html>
