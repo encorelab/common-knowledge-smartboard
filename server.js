@@ -4,4 +4,4 @@ global.bosh.server = 'localhost'
 global.rollcall.server = 'localhost'
 global.rollcall.port = 3000
 
-sail.server.start(8000)
+sail.server.start(8001)

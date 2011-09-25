@@ -61,7 +61,6 @@ CommonKnowledgeSmartboard = {
         },
         
         connected: function(ev) {
-            Sail.app.groupchat.join()
         },
         
         authenticated: function(ev) {
