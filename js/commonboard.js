@@ -1,4 +1,4 @@
-CommonKnowledgeSmartboard = {
+CommonBoard = {
     rollcallURL: '/rollcall',
     xmppDomain: 'glint',
     
@@ -15,7 +15,7 @@ CommonKnowledgeSmartboard = {
             .load('Strophe.AutoConnector')
             .load('AuthStatusWidget')
             .thenRun(function () {
-                Sail.autobindEvents(CommonKnowledgeSmartboard)
+                Sail.autobindEvents(CommonBoard)
                 
                 $(document).ready(function() {
                     $('#reload').click(function() {

@@ -3,7 +3,7 @@
 <head> 
     <title>Common Knowledge ~ Smartboard</title> 
   
-    <link href="css/ck.css" rel="stylesheet" type="text/css" /> 
+    <link href="css/commonboard.css" rel="stylesheet" type="text/css" /> 
     <link href="js/sail.js/css/sail.css" rel="stylesheet" type="text/css" />
     <link href="js/sail.js/css/jquery-ui/start/jquery-ui.css" rel="stylesheet" type="text/css" />
 
@@ -11,9 +11,9 @@
     <script type="text/javascript">
         Sail.load()
             .then('js/sail.js/rollcall.js')
-            .then('js/ck.js')
+            .then('js/commonboard.js')
             .thenRun(function() { 
-                return Sail.init(CommonKnowledgeSmartboard) 
+                return Sail.init(CommonBoard) 
             })
     </script>
 </head>
@@ -21,5 +21,8 @@
     <header>
         <h1>Common Knowledge</h1>
     </header>
+    
+    <div id="board">
+    </div>
 </body>
 </html>
