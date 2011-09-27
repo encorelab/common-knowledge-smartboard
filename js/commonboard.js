@@ -31,6 +31,74 @@ CommonBoard = {
             })
     },
     
+    createNoteBalloon: function(note) {
+        balloon = $("<div class='balloon note'></div>")
+
+        balloon.attr('id', "note-"+note.content._id)
+        balloon.addClass('author-'+CommonBoard.authorToClassName(note.author))
+        $(note.content.keywords).each(function() {
+            balloon.addClass('keyword-'+CommonBoard.keywordToClassName(this))
+        })
+
+        balloon.hide() // initially hidden, we call show() with an effect later
+
+        headline = $("<h3 class='headline'></h3>")
+        headline.text(note.content.headline)
+        balloon.append(headline)
+
+        writeup = $("<div class='writeup'></div>")
+        writeup.text(note.content.writeup)
+        writeup.hide()
+        balloon.append(writeup)
+
+        balloon.dblclick(function() {
+            $(this).find('.writeup').toggle('fast')
+        })
+
+        // balloon.dblclick(function() {
+        //     expl = $(this).find('.explanation')
+        //     if ($(expl).is(':visible'))
+        //         $(expl).hide('slide', {direction: 'up', duration: 'fast'})
+        //     else
+        //         $(expl).show('slide', {direction: 'up', duration: 'fast'})
+        // })
+
+        // bring the balloon to the top when clicked
+        balloon.mousedown(function() {
+            zs = $('.balloon').map(function() {z = $(this).css('z-index'); return z == 'auto' ? 100 : parseInt(z)})
+            maxZ = Math.max.apply(Math, zs)
+            $(this).css('z-index', maxZ + 1)
+        })
+
+        $("#board").append(balloon)
+        
+        // this should happen after the balloon has been given all of its content and styling
+        // so that its width and heigh can be accurately determined
+        
+        boardWidth = $("#board").width()
+        boardHeight = $("#board").height()
+        
+        x = Math.random() * (boardWidth - balloon.width())
+        y = Math.random() * (boardHeight - balloon.height())
+        
+        balloon.css('left', x + 'px')
+        balloon.css('top', y + 'px')
+
+        balloon.draggable()
+        
+        balloon.show('puff', 'fast')
+        
+        return balloon
+    },
+    
+    keywordToClassName: function(keyword) {
+        return "keyword-"+keyword.replace(/\s/,'_')
+    },
+
+    authorToClassName: function(author) {
+        return "author-"+author.replace(/\s/,'_')
+    },
+    
     authenticate: function() {
         Sail.app.token = Sail.app.rollcall.getCurrentToken()
 
@@ -53,7 +121,14 @@ CommonBoard = {
     
     events: {
         sail: {
-            
+            ck_new_note: function(sev) {
+                note = {
+                    content: sev.payload,
+                    author: sev.origin,
+                    timestamp: sev.timestamp
+                }
+                CommonBoard.createNoteBalloon(note)
+            }
         },
         
         initialized: function(ev) {
