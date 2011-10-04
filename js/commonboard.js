@@ -2,6 +2,37 @@ CommonBoard = {
     rollcallURL: '/rollcall',
     xmppDomain: 'glint',
     
+    events: {
+        sail: {
+            ck_new_note: function(sev) {
+                debugger
+                note = {
+                    content: sev.payload,
+                    author: sev.origin,
+                    timestamp: sev.timestamp,
+                    id: sev.payload.id
+                }
+                CommonBoard.createNoteBalloon(note)
+                CommonBoard.updateKeywordsWithNewNote(note)
+            },
+        },
+        
+        initialized: function(ev) {
+            Sail.app.authenticate()
+        },
+        
+        connected: function(ev) {
+        },
+        
+        authenticated: function(ev) {
+            $('#connecting').hide()
+        },
+        
+        unauthenticated: function(ev) {
+            Rollcall.Authenticator.requestRun()
+        }
+    },
+    
     init: function() {
         Sail.app.rollcall = new Rollcall.Client(Sail.app.rollcallURL)
         
@@ -34,25 +65,52 @@ CommonBoard = {
     createNoteBalloon: function(note) {
         balloon = $("<div class='balloon note'></div>")
 
-        balloon.attr('id', "note-"+note.content._id)
+        balloon.attr('id', "note-"+note.id)
         balloon.addClass('author-'+CommonBoard.authorToClassName(note.author))
         $(note.content.keywords).each(function() {
-            balloon.addClass('keyword-'+CommonBoard.keywordToClassName(this))
+            balloon.addClass(CommonBoard.keywordToClassName(this))
         })
 
         balloon.hide() // initially hidden, we call show() with an effect later
+        
+        activeKeywordClasses = CommonBoard.activeKeywordClasses()
+        
+        // don't hide incoming balloons if no tags are active
+        if (activeKeywordClasses.length > 0) {
+            // check if any of this balloon's keywords are currently selected
+            anyActive = _.any(activeKeywordClasses, function(klass) {
+                return balloon.is('.'+klass)
+            })
+
+            if (!anyActive)
+                balloon.addClass('blurred')
+        }
+        
+        
+        
+        author = $("<div class='author'>")
+        author.text(note.author)
+        balloon.append(author)
 
         headline = $("<h3 class='headline'></h3>")
         headline.text(note.content.headline)
         balloon.append(headline)
 
+        content = $("<div class='content'></div>")
+        content.hide()
+        
         writeup = $("<div class='writeup'></div>")
         writeup.text(note.content.writeup)
-        writeup.hide()
-        balloon.append(writeup)
+        content.append(writeup)
+        
+        keywords = $("<div class='keywords'></div>")
+        keywords.text(note.content.keywords.join(", "))
+        content.append(keywords)
+        
+        balloon.append(content)
 
         balloon.dblclick(function() {
-            $(this).find('.writeup').toggle('fast')
+            $(this).find('.content').toggle('fast')
         })
 
         // balloon.dblclick(function() {
@@ -99,6 +157,69 @@ CommonBoard = {
         return "author-"+author.replace(/\s/,'_')
     },
     
+    updateKeywordsWithNewNote: function(note) {
+        none_yet = $('#keywords .none-yet')
+        if (none_yet.length > 0)
+            none_yet.remove()
+        
+        list = $('#keywords ul')
+        _.each(note.content.keywords, function (keyword) {
+            klass = CommonBoard.keywordToClassName(keyword)
+            li = list.find('.'+klass)
+            if (li.length == 0) {
+                li = $('<li></li>')
+                li.text(keyword)
+                li.addClass(klass)
+                li.click(function() {
+                    CommonBoard.toggleKeyword(keyword)
+                })
+                list.append(li)
+            }
+        })
+    },
+    
+    toggleKeyword: function(keyword) {
+        klass = CommonBoard.keywordToClassName(keyword)
+        li = $('#keywords li.'+klass)
+        if (li.is('.selected')) {
+            li.removeClass('selected')
+            CommonBoard.filterBalloons()
+        } else {
+            li.addClass('selected')
+            CommonBoard.filterBalloons()
+        }
+    },
+    
+    activeKeywordClasses: function() {
+        return $('#keywords li.selected').map(function() {
+            return _.select($(this).attr('class').split(' '), function(klass) {
+                return klass.match(/keyword-/)
+            })
+        }).toArray()
+    },
+    
+    inactiveKeywordClasses: function() {
+        return $('#keywords li').not('.selected').map(function() {
+            return _.select($(this).attr('class').split(' '), function(klass) {
+                return klass.match(/keyword-/)
+            })
+        }).toArray()
+    },
+    
+    filterBalloons: function() {
+        activeKeywordClasses = CommonBoard.activeKeywordClasses()
+        inactiveKeywordClasses = CommonBoard.inactiveKeywordClasses()
+        
+        // TODO: use inactiveKeywordClasses to make this more efficient
+        $('.balloon').addClass('blurred')
+        
+        // INTERSECTION (and)
+        //$('.balloon.'+activeKeywordClasses.join(".")).removeClass('blurred')
+        
+        // UNION (or)
+        $('.balloon.'+activeKeywordClasses.join(", .balloon.")).removeClass('blurred')
+    },
+    
     authenticate: function() {
         Sail.app.token = Sail.app.rollcall.getCurrentToken()
 
@@ -119,31 +240,5 @@ CommonBoard = {
         }
     },
     
-    events: {
-        sail: {
-            ck_new_note: function(sev) {
-                note = {
-                    content: sev.payload,
-                    author: sev.origin,
-                    timestamp: sev.timestamp
-                }
-                CommonBoard.createNoteBalloon(note)
-            }
-        },
-        
-        initialized: function(ev) {
-            Sail.app.authenticate()
-        },
-        
-        connected: function(ev) {
-        },
-        
-        authenticated: function(ev) {
-            $('#connecting').hide()
-        },
-        
-        unauthenticated: function(ev) {
-            Rollcall.Authenticator.requestRun()
-        }
-    }
+
 }
