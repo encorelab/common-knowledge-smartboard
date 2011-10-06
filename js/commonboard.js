@@ -222,7 +222,10 @@ CommonBoard = {
     authenticate: function() {
         Sail.app.token = Sail.app.rollcall.getCurrentToken()
 
-        if (!Sail.app.token) {
+        Sail.app.run = Sail.app.run || JSON.parse($.cookie('run'))
+        if (!Sail.app.run) {
+            Rollcall.Authenticator.requestRun()
+        } else if (!Sail.app.token) {
             Rollcall.Authenticator.requestLogin()
         } else {
             Sail.app.rollcall.fetchSessionForToken(Sail.app.token, 
