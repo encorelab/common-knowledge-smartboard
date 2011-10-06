@@ -5,7 +5,6 @@ CommonBoard = {
     events: {
         sail: {
             ck_new_note: function(sev) {
-                debugger
                 note = {
                     content: sev.payload,
                     author: sev.origin,
@@ -42,7 +41,7 @@ CommonBoard = {
         }
         
         Sail.modules
-            .load('Rollcall.Authenticator', {mode: 'picker', askForRun: true, curnit: 'WallCology'})
+            .load('Rollcall.Authenticator', {mode: 'picker', askForRun: true, curnit: 'WallCology', userFilter: function(u) {return u.kind == "Instructor"}})
             .load('Strophe.AutoConnector')
             .load('AuthStatusWidget')
             .thenRun(function () {
