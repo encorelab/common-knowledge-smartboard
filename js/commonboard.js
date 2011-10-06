@@ -1,6 +1,6 @@
 CommonBoard = {
     rollcallURL: '/rollcall',
-    xmppDomain: 'glint',
+    xmppDomain: 'aardvark.encorelab.org',
     
     events: {
         sail: {
