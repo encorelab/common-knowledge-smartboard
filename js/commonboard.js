@@ -108,7 +108,7 @@ CommonBoard = {
         
         balloon.append(content)
 
-        balloon.dblclick(function() {
+        balloon.click(function() {
             $(this).find('.content').toggle('fast')
         })
 
