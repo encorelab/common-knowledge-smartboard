@@ -208,14 +208,19 @@ CommonBoard = {
         activeKeywordClasses = CommonBoard.activeKeywordClasses()
         inactiveKeywordClasses = CommonBoard.inactiveKeywordClasses()
         
-        // TODO: use inactiveKeywordClasses to make this more efficient
-        $('.balloon').addClass('blurred')
+        if (activeKeywordClasses.length == 0) {
+            // show all balloons if no filters are active
+            $('.balloon').removeClass('blurred')
+        } else {
+            // TODO: use inactiveKeywordClasses to make this more efficient
+            $('.balloon').addClass('blurred')
         
-        // INTERSECTION (and)
-        //$('.balloon.'+activeKeywordClasses.join(".")).removeClass('blurred')
+            // INTERSECTION (and)
+            //$('.balloon.'+activeKeywordClasses.join(".")).removeClass('blurred')
         
-        // UNION (or)
-        $('.balloon.'+activeKeywordClasses.join(", .balloon.")).removeClass('blurred')
+            // UNION (or)
+            $('.balloon.'+activeKeywordClasses.join(", .balloon.")).removeClass('blurred')
+        }
     },
     
     authenticate: function() {
