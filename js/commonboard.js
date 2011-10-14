@@ -1,6 +1,5 @@
 CommonBoard = {
     rollcallURL: '/rollcall',
-    xmppDomain: 'glint',
     
     events: {
         sail: {

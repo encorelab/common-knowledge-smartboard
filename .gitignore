@@ -1,3 +1,4 @@
 *.log
 *.pid
 .DS_Store
+config.json
