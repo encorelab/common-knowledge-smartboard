@@ -121,7 +121,7 @@ CommonBoard = {
 
         // bring the balloon to the top when clicked
         balloon.mousedown(function() {
-            zs = $('.balloon').map(function() {z = $(this).css('z-index'); return z == 'auto' ? 100 : parseInt(z)})
+            zs = $('.balloon').map(function() {z = $(this).css('z-index'); return z == 'auto' ? 100 : parseInt(z)}).toArray()
             maxZ = Math.max.apply(Math, zs)
             $(this).css('z-index', maxZ + 1)
         })
