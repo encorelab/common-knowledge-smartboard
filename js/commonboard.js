@@ -5,7 +5,8 @@ CommonBoard = {
         sail: {
             ck_new_note: function(sev) {
                 note = {
-                    content: sev.payload,
+                    content: sev.payload.content,
+                    pos: sev.payload.pos,
                     author: sev.origin,
                     timestamp: sev.timestamp,
                     id: sev.payload.id
@@ -53,6 +54,11 @@ CommonBoard = {
                     })
 
                     $('#connecting').show()
+                    
+                    $('#restore-notes').click(function() {
+                        fromDate = moment().subtract('days', 7).native()
+                        CommonBoard.loadNotes({"timestamp": {"$gte": fromDate.toISOString()}})
+                    })
                 })
 
                 $(Sail.app).trigger('initialized')
@@ -61,8 +67,8 @@ CommonBoard = {
     },
     
     createNoteBalloon: function(note) {
-        balloon = $("<div class='balloon note'></div>")
-
+        var balloon = $("<div class='balloon note'></div>")
+        
         balloon.attr('id', "note-"+note.id)
         balloon.addClass('author-'+CommonBoard.authorToClassName(note.author))
         $(note.content.keywords).each(function() {
@@ -84,8 +90,6 @@ CommonBoard = {
                 balloon.addClass('blurred')
         }
         
-        
-        
         author = $("<div class='author'>")
         author.text(note.author)
         balloon.append(author)
@@ -102,8 +106,10 @@ CommonBoard = {
         content.append(writeup)
         
         keywords = $("<div class='keywords'></div>")
-        keywords.text(note.content.keywords.join(", "))
-        content.append(keywords)
+        if (note.content.keywords) {
+            keywords.text(note.content.keywords.join(", "))
+            content.append(keywords)
+        }
         
         balloon.append(content)
 
@@ -131,20 +137,52 @@ CommonBoard = {
         // this should happen after the balloon has been given all of its content and styling
         // so that its width and heigh can be accurately determined
         
-        boardWidth = $("#board").width()
-        boardHeight = $("#board").height()
-        
-        x = Math.random() * (boardWidth - balloon.width())
-        y = Math.random() * (boardHeight - balloon.height())
-        
-        balloon.css('left', x + 'px')
-        balloon.css('top', y + 'px')
+        CommonBoard.positionNoteBalloon(note, balloon)
 
-        balloon.draggable()
+        balloon.draggable({
+            stop: function(ev, ui) {
+                CommonBoard.noteBalloonPositioned(note, ui.position)
+            }
+        })
         
         balloon.show('puff', 'fast')
         
         return balloon
+    },
+    
+    positionNoteBalloon: function(note, balloon) {
+        var left, top;
+        
+        boardWidth = $("#board").width();
+        boardHeight = $("#board").height();
+        
+        if (note.pos && note.pos.left)
+            left = note.pos.left;
+        else
+            left = Math.random() * (boardWidth - balloon.width());
+        
+        if (note.pos && note.pos.top)
+            top = note.pos.top;
+        else
+            top = Math.random() * (boardHeight - balloon.height());
+        
+        balloon.css('left', left + 'px');
+        balloon.css('top', top + 'px');
+        
+        if (note.id) {
+            CommonBoard.noteBalloonPositioned(note, balloon.position());
+        }
+    },
+    
+    noteBalloonPositioned: function(note, pos) {
+        payload = {
+            id: note.id,
+            pos: pos,
+        }
+    
+        sev = new Sail.Event('ck_position_note', payload)
+	
+    	Sail.app.groupchat.sendEvent(sev)  
     },
     
     keywordToClassName: function(keyword) {
@@ -221,6 +259,34 @@ CommonBoard = {
             // UNION (or)
             $('.balloon.'+activeKeywordClasses.join(", .balloon.")).removeClass('blurred')
         }
+    },
+    
+    loadNotes: function(criteria) {
+        var criteria = _.extend({'run.name':Sail.app.run.name}, criteria)
+        
+        // FIXME: will only fetch last 100 notes... need to do a _count request first
+        $.ajax({
+            url: (Sail.app.mongooseURL || '/mongoose') + '/common-knowledge/notes/_find',
+            data: {
+                criteria: JSON.stringify(criteria),
+                batch_size: 100,
+                sort: JSON.stringify({"timestamp":-1})
+            },
+            success: function(data) {
+                console.debug("Got "+data.results.length+" notes from mongoose...")
+                _.each(data.results, function(note) {
+                    note.id = note._id
+                    if ($('#note-'+note.id).length == 0) {
+                        CommonBoard.createNoteBalloon(note)
+                        CommonBoard.updateKeywordsWithNewNote(note)
+                    }
+                })
+            },
+            error: function(xhr, error, ex) {
+                console.error("Failed to load existing discussions: ", error, ex)
+                alert("Failed to load existing discussions: "+error)
+            }
+        })
     },
     
     authenticate: function() {

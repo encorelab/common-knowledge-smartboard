@@ -101,3 +101,10 @@ body {
   margin-top: 0.5em;
   font-size: 14px;
 }
+
+#restore-notes {
+  position: absolute;
+  top: 5px;
+  right: 150px;
+  font-size: 14px;
+}
