@@ -170,7 +170,7 @@ CommonBoard = {
         balloon.css('top', top + 'px');
         
         if (note.id) {
-            CommonBoard.noteBalloonPositioned(note, balloon.position());
+            CommonBoard.noteBalloonPositioned(note, {left: left, top: top});
         }
     },
     
