@@ -56,7 +56,7 @@ CommonBoard = {
                     $('#connecting').show()
                     
                     $('#restore-notes').click(function() {
-                        fromDate = moment().subtract('days', 7).native()
+                        fromDate = moment().subtract('days', 14).native()
                         CommonBoard.loadNotes({"timestamp": {"$gte": fromDate.toISOString()}})
                     })
                 })
